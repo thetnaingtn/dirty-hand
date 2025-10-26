@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+
+option go_package = "gen/api/v1;v1";
+
+message User {
+    int64 id = 1;
+    string username = 2;
+    string password = 3;
+    Role role = 4;
+}
+
+enum Role {
+    UNSPECIFIED = 0;
+    ADMIN = 1;
+    PRODUCT_VIEWER = 2;
+    PRODUCT_EDITOR = 3;
+}
+
+message CreateUserRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message CreateSessionRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message DeleteSessionRequest {}
+
+message CreateSessionResponse{
+    User user = 1;
+    google.protobuf.Timestamp last_accessed_at = 2;
+}
+
+service UserService{
+    rpc CreateUser(CreateUserRequest) returns (User) {
+        option (google.api.http) = {
+            post: "/v1/users/signup"
+            body: "*"
+        };
+    }
+
+    rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse) {
+        option (google.api.http) = {
+            post: "/v1/users/signin"
+            body: "*"
+        };
+    }
+
+    rpc DeleteSession(DeleteSessionRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/users/logout"
+            body: "*"
+        };
+    }
+}

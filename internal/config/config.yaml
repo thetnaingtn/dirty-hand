@@ -1,0 +1,14 @@
+# Atlas Application Configuration
+# This is the default configuration file
+
+# Server configuration
+server:
+  addr: "localhost"
+  port: "8080"
+
+# Database configuration
+database:
+  dsn: "atlas.db"
+
+# Environment (development, staging, production)
+environment: "development"
