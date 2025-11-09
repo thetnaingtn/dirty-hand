@@ -20,7 +20,7 @@ type Driver interface {
 
 	CreateUser(ctx context.Context, user *User) error
 	ListUsers(ctx context.Context, filter *FindUser) ([]User, error)
-	GetUser(ctx context.Context, id int64) (*User, error)
+	GetUser(ctx context.Context, filter *FindUser) (*User, error)
 	CreateSession(ctx context.Context, session *Session) error
 	GetUserSessions(ctx context.Context, id int64) ([]Session, error)
 

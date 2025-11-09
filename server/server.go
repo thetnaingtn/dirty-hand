@@ -29,9 +29,12 @@ type Server struct {
 func NewServer(ctx context.Context, store *store.Store, config *config.Config) (*Server, error) {
 	mux := http.NewServeMux()
 
+	authInterceptor := v1.NewGRPCAuthInterceptor(store)
+
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			grpcrecovery.UnaryServerInterceptor(),
+			authInterceptor.AuthenticateInterceptor,
 		),
 	)
 

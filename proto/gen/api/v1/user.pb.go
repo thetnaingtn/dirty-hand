@@ -198,8 +198,9 @@ func (x *CreateUserRequest) GetPassword() string {
 
 type CreateSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
-	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -232,6 +233,13 @@ func (x *CreateSessionRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateSessionRequest.ProtoReflect.Descriptor instead.
 func (*CreateSessionRequest) Descriptor() ([]byte, []int) {
 	return file_api_v1_user_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CreateSessionRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
 }
 
 func (x *CreateSessionRequest) GetUsername() string {
@@ -340,18 +348,19 @@ var File_api_v1_user_proto protoreflect.FileDescriptor
 
 const file_api_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x11api/v1/user.proto\x12\x06api.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"p\n" +
+	"\x11api/v1/user.proto\x12\x06api.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1fgoogle/api/field_behavior.proto\"u\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x03 \x01(\tR\bpassword\x12 \n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12\x1f\n" +
+	"\bpassword\x18\x03 \x01(\tB\x03\xe0A\x04R\bpassword\x12 \n" +
 	"\x04role\x18\x04 \x01(\x0e2\f.api.v1.RoleR\x04role\"K\n" +
 	"\x11CreateUserRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"N\n" +
-	"\x14CreateSessionRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x16\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"g\n" +
+	"\x14CreateSessionRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\"\x16\n" +
 	"\x14DeleteSessionRequest\"\x7f\n" +
 	"\x15CreateSessionResponse\x12 \n" +
 	"\x04user\x18\x01 \x01(\v2\f.api.v1.UserR\x04user\x12D\n" +

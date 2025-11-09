@@ -69,6 +69,7 @@ export interface CreateUserRequest {
 }
 
 export interface CreateSessionRequest {
+  userId: number;
   username: string;
   password: string;
 }
@@ -222,16 +223,19 @@ export const CreateUserRequest: MessageFns<CreateUserRequest> = {
 };
 
 function createBaseCreateSessionRequest(): CreateSessionRequest {
-  return { username: "", password: "" };
+  return { userId: 0, username: "", password: "" };
 }
 
 export const CreateSessionRequest: MessageFns<CreateSessionRequest> = {
   encode(message: CreateSessionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== 0) {
+      writer.uint32(8).int64(message.userId);
+    }
     if (message.username !== "") {
-      writer.uint32(10).string(message.username);
+      writer.uint32(18).string(message.username);
     }
     if (message.password !== "") {
-      writer.uint32(18).string(message.password);
+      writer.uint32(26).string(message.password);
     }
     return writer;
   },
@@ -244,15 +248,23 @@ export const CreateSessionRequest: MessageFns<CreateSessionRequest> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 10) {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.userId = longToNumber(reader.int64());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
             break;
           }
 
           message.username = reader.string();
           continue;
         }
-        case 2: {
-          if (tag !== 18) {
+        case 3: {
+          if (tag !== 26) {
             break;
           }
 
@@ -273,6 +285,7 @@ export const CreateSessionRequest: MessageFns<CreateSessionRequest> = {
   },
   fromPartial(object: DeepPartial<CreateSessionRequest>): CreateSessionRequest {
     const message = createBaseCreateSessionRequest();
+    message.userId = object.userId ?? 0;
     message.username = object.username ?? "";
     message.password = object.password ?? "";
     return message;

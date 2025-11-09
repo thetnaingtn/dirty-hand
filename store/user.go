@@ -1,6 +1,8 @@
 package store
 
-import "context"
+import (
+	"context"
+)
 
 type Role string
 
@@ -18,7 +20,9 @@ type User struct {
 }
 
 type FindUser struct {
-	Role *Role
+	Role     *Role
+	ID       *int64
+	Username *string
 }
 
 func (s *Store) CreateUser(ctx context.Context, user *User) error {
@@ -29,8 +33,8 @@ func (s *Store) ListUsers(ctx context.Context, filter *FindUser) ([]User, error)
 	return s.driver.ListUsers(ctx, filter)
 }
 
-func (s *Store) GetUser(ctx context.Context, id int64) (*User, error) {
-	return s.driver.GetUser(ctx, id)
+func (s *Store) GetUser(ctx context.Context, filter *FindUser) (*User, error) {
+	return s.driver.GetUser(ctx, filter)
 }
 
 func (s *Store) GetUserSessions(ctx context.Context, userId int64) ([]Session, error) {

@@ -23,11 +23,16 @@ const (
 	sessionIdContextKey
 )
 
-type GRPCAuthInterceptor struct {
-	store store.Store
+var authticationAllowListMethods = map[string]bool{
+	"/api.v1.UserService/CreateUser":    true,
+	"/api.v1.UserService/CreateSession": true,
 }
 
-func NewGRPCAuthInterceptor(store store.Store) *GRPCAuthInterceptor {
+type GRPCAuthInterceptor struct {
+	store *store.Store
+}
+
+func NewGRPCAuthInterceptor(store *store.Store) *GRPCAuthInterceptor {
 	return &GRPCAuthInterceptor{
 		store: store,
 	}
@@ -39,7 +44,7 @@ func (in *GRPCAuthInterceptor) AuthenticateInterceptor(ctx context.Context, req 
 		return nil, status.Error(codes.Unauthenticated, "failed to parse metadata")
 	}
 
-	if sessionCookieValue, err := getSessionIDFromMetadata(md); sessionCookieValue != "" && err == nil {
+	if sessionCookieValue, err := getSessionIDFromMetadata(md); err != nil && sessionCookieValue != "" {
 		user, err := in.authenticateBySession(ctx, sessionCookieValue)
 		if err == nil && user != nil {
 			_, sessionId, parsedErr := parseSessionCookieValue(sessionCookieValue)
@@ -57,12 +62,14 @@ func (in *GRPCAuthInterceptor) AuthenticateInterceptor(ctx context.Context, req 
 			}
 
 			handler(ctx, req)
-
 		}
 
 	}
 
-	// Perform authentication using the metadata
+	if isUnauthorizeAllowMethod(info.FullMethod) {
+		return handler(ctx, req)
+	}
+
 	return nil, status.Error(codes.Unauthenticated, "authentication required")
 }
 
@@ -77,7 +84,9 @@ func (in *GRPCAuthInterceptor) authenticateBySession(ctx context.Context, sessio
 		return nil, status.Error(codes.Unauthenticated, "invalid session cookie format")
 	}
 
-	user, err := in.store.GetUser(ctx, userId)
+	user, err := in.store.GetUser(ctx, &store.FindUser{
+		ID: &userId,
+	})
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "failed to get user")
 	}
@@ -142,4 +151,8 @@ func getSessionIDFromMetadata(md metadata.MD) (string, error) {
 	}
 
 	return sessionId, nil
+}
+
+func isUnauthorizeAllowMethod(method string) bool {
+	return authticationAllowListMethods[method]
 }

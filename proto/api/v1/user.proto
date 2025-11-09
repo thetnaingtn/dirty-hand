@@ -5,6 +5,8 @@ package api.v1;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "google/api/field_behavior.proto";
+
 
 
 option go_package = "gen/api/v1;v1";
@@ -12,7 +14,7 @@ option go_package = "gen/api/v1;v1";
 message User {
     int64 id = 1;
     string username = 2;
-    string password = 3;
+    string password = 3 [(google.api.field_behavior) = INPUT_ONLY];
     Role role = 4;
 }
 
@@ -29,8 +31,9 @@ message CreateUserRequest {
 }
 
 message CreateSessionRequest {
-    string username = 1;
-    string password = 2;
+    int64 user_id = 1;
+    string username = 2;
+    string password = 3;
 }
 
 message DeleteSessionRequest {}

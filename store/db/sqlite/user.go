@@ -51,10 +51,30 @@ func (d *DB) ListUsers(ctx context.Context, filter *store.FindUser) ([]store.Use
 	return users, nil
 }
 
-func (d *DB) GetUser(ctx context.Context, id int64) (*store.User, error) {
+func (d *DB) GetUser(ctx context.Context, filter *store.FindUser) (*store.User, error) {
 	var user store.User
-	stmt := "SELECT id, username, password_hash, role FROM user WHERE id=?"
-	if err := d.db.QueryRowContext(ctx, stmt, id).Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Role); err != nil {
+	where, args := []string{"1 = 1"}, []any{}
+
+	if filter != nil {
+		if v := filter.Role; v != nil {
+			where = append(where, "role = ?")
+			args = append(args, *v)
+		}
+
+		if v := filter.Username; v != nil {
+			where = append(where, "username = ?")
+			args = append(args, *v)
+		}
+
+		if v := filter.ID; v != nil {
+			where = append(where, "id = ?")
+			args = append(args, *v)
+		}
+	}
+
+	stmt := "SELECT id, username, password_hash, role FROM users WHERE " + strings.Join(where, " AND ")
+
+	if err := d.db.QueryRowContext(ctx, stmt, args...).Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Role); err != nil {
 		return nil, err
 	}
 

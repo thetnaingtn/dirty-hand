@@ -27,10 +27,15 @@ export function CreatePage() {
         username,
         password,
       })
+      await userClient.createSession({
+        username,
+        password,
+      })
+
       navigate('/')
     } catch (e) {
       console.error(e)
-      setError('Failed to create user. Please try again.')
+      setError('Failed to sign up. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
