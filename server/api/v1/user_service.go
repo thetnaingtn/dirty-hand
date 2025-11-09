@@ -26,17 +26,10 @@ func (s *APIV1Service) CreateUser(ctx context.Context, req *apiv1.CreateUserRequ
 		return nil, status.Errorf(codes.Internal, "failed to check existing admin users: %v", err)
 	}
 
-	user := &store.User{
-		Username: req.GetUsername(),
-		Role:     store.RoleProductView,
-	}
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.GetPassword()), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to hash password: %v", err)
 	}
-
-	user.PasswordHash = string(hashedPassword)
 
 	roleToAssign := store.RoleAdmin
 	if len(existingUsers) > 0 {
@@ -45,9 +38,13 @@ func (s *APIV1Service) CreateUser(ctx context.Context, req *apiv1.CreateUserRequ
 		roleToAssign = store.RoleAdmin
 	}
 
-	user.Role = roleToAssign
+	user, err := s.store.CreateUser(ctx, &store.User{
+		Username:     req.GetUsername(),
+		PasswordHash: string(hashedPassword),
+		Role:         roleToAssign,
+	})
 
-	if err := s.store.CreateUser(ctx, user); err != nil {
+	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create user: %v", err)
 	}
 
@@ -55,7 +52,6 @@ func (s *APIV1Service) CreateUser(ctx context.Context, req *apiv1.CreateUserRequ
 		Id:       user.ID,
 		Username: user.Username,
 		Role:     convertUserRoleFromStore(user.Role),
-		Password: user.PasswordHash,
 	}, nil
 }
 

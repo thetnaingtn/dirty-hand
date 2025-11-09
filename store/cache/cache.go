@@ -58,7 +58,7 @@ func (c *Cache) Set(key string, value any) {
 	c.data.Store(key, item)
 }
 
-func (c *Cache) Get(key string, value any) (any, bool) {
+func (c *Cache) Get(key string) (any, bool) {
 	value, ok := c.data.Load(key)
 	if !ok {
 		return nil, false

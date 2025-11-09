@@ -18,7 +18,7 @@ type Driver interface {
 	ListProducts(ctx context.Context) ([]*Product, error)
 	DeleteProduct(ctx context.Context, id int64) error
 
-	CreateUser(ctx context.Context, user *User) error
+	CreateUser(ctx context.Context, user *User) (*User, error)
 	ListUsers(ctx context.Context, filter *FindUser) ([]User, error)
 	GetUser(ctx context.Context, filter *FindUser) (*User, error)
 	CreateSession(ctx context.Context, session *Session) error

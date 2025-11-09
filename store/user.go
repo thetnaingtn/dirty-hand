@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"strconv"
 )
 
 type Role string
@@ -25,8 +26,16 @@ type FindUser struct {
 	Username *string
 }
 
-func (s *Store) CreateUser(ctx context.Context, user *User) error {
-	return s.driver.CreateUser(ctx, user)
+func (s *Store) CreateUser(ctx context.Context, user *User) (*User, error) {
+	user, err := s.driver.CreateUser(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	key := strconv.FormatInt(user.ID, 10)
+	s.userCache.Set(key, user)
+
+	return user, nil
 }
 
 func (s *Store) ListUsers(ctx context.Context, filter *FindUser) ([]User, error) {
@@ -34,6 +43,16 @@ func (s *Store) ListUsers(ctx context.Context, filter *FindUser) ([]User, error)
 }
 
 func (s *Store) GetUser(ctx context.Context, filter *FindUser) (*User, error) {
+	if filter.ID != nil {
+		key := strconv.FormatInt(*filter.ID, 10)
+		item, exist := s.userCache.Get(key)
+		if exist {
+			if user, ok := item.(*User); ok {
+				return user, nil
+			}
+		}
+	}
+
 	return s.driver.GetUser(ctx, filter)
 }
 

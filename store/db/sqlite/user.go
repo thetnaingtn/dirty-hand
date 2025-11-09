@@ -7,18 +7,18 @@ import (
 	"github.com/thetnaingtn/dirty-hand/store"
 )
 
-func (d *DB) CreateUser(ctx context.Context, user *store.User) error {
+func (d *DB) CreateUser(ctx context.Context, create *store.User) (*store.User, error) {
 	fields := []string{"username", "password_hash", "role"}
 	placeholders := []string{"?", "?", "?"}
-	values := []any{user.Username, user.PasswordHash, user.Role}
+	values := []any{create.Username, create.PasswordHash, create.Role}
 
 	stmt := "INSERT INTO users (" + strings.Join(fields, ", ") + ") VALUES (" + strings.Join(placeholders, ", ") + ") RETURNING id"
 
-	if err := d.db.QueryRowContext(ctx, stmt, values...).Scan(&user.ID); err != nil {
-		return err
+	if err := d.db.QueryRowContext(ctx, stmt, values...).Scan(&create.ID); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return create, nil
 }
 
 func (d *DB) ListUsers(ctx context.Context, filter *store.FindUser) ([]store.User, error) {
