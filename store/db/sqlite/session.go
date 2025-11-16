@@ -7,14 +7,17 @@ import (
 	"github.com/thetnaingtn/dirty-hand/store"
 )
 
-func (d *DB) CreateSession(ctx context.Context, session *store.Session) error {
+func (d *DB) CreateSession(ctx context.Context, session *store.Session) (*store.Session, error) {
 	query := `INSERT INTO sessions (user_id, session_id, last_accessed_time) VALUES (?, ?, ?)`
 
-	_, err := d.db.ExecContext(ctx, query, session.UserID, session.SessionID, session.LastAccessedTime)
-	return err
+	if _, err := d.db.ExecContext(ctx, query, session.UserID, session.SessionID, session.LastAccessedTime); err != nil {
+		return nil, err
+	}
+
+	return session, nil
 }
 
-func (d *DB) GetUserSessions(ctx context.Context, userId int64) ([]store.Session, error) {
+func (d *DB) GetUserSessions(ctx context.Context, userId int64) ([]*store.Session, error) {
 	query := `SELECT session_id, user_id, last_accessed_time FROM sessions WHERE user_id = ?`
 
 	rows, err := d.db.QueryContext(ctx, query, userId)
@@ -23,9 +26,9 @@ func (d *DB) GetUserSessions(ctx context.Context, userId int64) ([]store.Session
 	}
 	defer rows.Close()
 
-	var sessions []store.Session
+	var sessions []*store.Session
 	for rows.Next() {
-		var session store.Session
+		session := &store.Session{}
 		err := rows.Scan(&session.SessionID, &session.UserID, &session.LastAccessedTime)
 		if err != nil {
 			return nil, err

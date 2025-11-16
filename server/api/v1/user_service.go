@@ -99,7 +99,7 @@ func (s *APIV1Service) doSignIn(ctx context.Context, userId int64, lastAccessedA
 	if expireTime.IsZero() {
 		attrs = append(attrs, "Expires=Thu, 01 Jan 1970 00:00:00 GMT")
 	} else {
-		attrs = append(attrs, expireTime.Format(time.RFC1123))
+		attrs = append(attrs, "Expires="+expireTime.Format(time.RFC1123))
 	}
 
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -118,7 +118,7 @@ func (s *APIV1Service) doSignIn(ctx context.Context, userId int64, lastAccessedA
 		attrs = append(attrs, "SameSite=Strict")
 	}
 
-	err := s.store.CreateSession(ctx, &store.Session{
+	_, err := s.store.CreateSession(ctx, &store.Session{
 		UserID:           userId,
 		SessionID:        sessionId.String(),
 		LastAccessedTime: lastAccessedAt,

@@ -21,8 +21,8 @@ type Driver interface {
 	CreateUser(ctx context.Context, user *User) (*User, error)
 	ListUsers(ctx context.Context, filter *FindUser) ([]User, error)
 	GetUser(ctx context.Context, filter *FindUser) (*User, error)
-	CreateSession(ctx context.Context, session *Session) error
-	GetUserSessions(ctx context.Context, id int64) ([]Session, error)
 
+	CreateSession(ctx context.Context, session *Session) (*Session, error)
+	GetUserSessions(ctx context.Context, id int64) ([]*Session, error)
 	UpdateLastAccessedTime(ctx context.Context, sessionId string, lastAccessTime time.Time) error
 }

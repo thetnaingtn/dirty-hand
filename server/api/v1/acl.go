@@ -44,7 +44,7 @@ func (in *GRPCAuthInterceptor) AuthenticateInterceptor(ctx context.Context, req 
 		return nil, status.Error(codes.Unauthenticated, "failed to parse metadata")
 	}
 
-	if sessionCookieValue, err := getSessionIDFromMetadata(md); err != nil && sessionCookieValue != "" {
+	if sessionCookieValue, err := getSessionIDFromMetadata(md); err == nil && sessionCookieValue != "" {
 		user, err := in.authenticateBySession(ctx, sessionCookieValue)
 		if err == nil && user != nil {
 			_, sessionId, parsedErr := parseSessionCookieValue(sessionCookieValue)
@@ -61,7 +61,7 @@ func (in *GRPCAuthInterceptor) AuthenticateInterceptor(ctx context.Context, req 
 				return nil, status.Error(codes.Internal, "failed to update last accessed time")
 			}
 
-			handler(ctx, req)
+			return handler(ctx, req)
 		}
 
 	}
@@ -104,18 +104,19 @@ func (in *GRPCAuthInterceptor) authenticateBySession(ctx context.Context, sessio
 	return user, nil
 }
 
-func (in *GRPCAuthInterceptor) validateUserSession(sessions []store.Session, sessionId string) bool {
+func (in *GRPCAuthInterceptor) validateUserSession(sessions []*store.Session, sessionId string) bool {
 	for _, session := range sessions {
-		if session.SessionID == sessionId {
+		if session != nil && session.SessionID == sessionId {
 			expiredTime := session.LastAccessedTime.Add(14 * 24 * time.Hour)
-
 			if expiredTime.Before(time.Now()) {
 				return false
+			} else {
+				return true
 			}
 		}
 	}
 
-	return true
+	return false
 }
 
 func parseSessionCookieValue(sessionId string) (int64, string, error) {

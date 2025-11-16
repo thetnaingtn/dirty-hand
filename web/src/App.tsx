@@ -3,7 +3,8 @@ import ListPage from './pages/ListPage'
 import DetailPage from './pages/DetailPage'
 import CreatePage from './pages/CreatePage'
 import UpdatePage from './pages/UpdatePage'
-import {UserCreatePage} from "./pages/user"
+import { UserCreatePage } from "./pages/user"
+import { SigninPage } from './pages/user/SigninPage'
 
 export default function App() {
   return (
@@ -20,7 +21,10 @@ export default function App() {
           <Route path="/products/:id" element={<DetailPage />} />
           <Route path="/products/:id/edit" element={<UpdatePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-          <Route path="/users/new" element={<UserCreatePage />} />
+          <Route path="/users">
+            <Route path="new" element={<UserCreatePage />} />
+            <Route path="signin" element={<SigninPage />} />
+          </Route>
         </Routes>
       </main>
     </div>

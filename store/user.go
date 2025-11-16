@@ -56,6 +56,14 @@ func (s *Store) GetUser(ctx context.Context, filter *FindUser) (*User, error) {
 	return s.driver.GetUser(ctx, filter)
 }
 
-func (s *Store) GetUserSessions(ctx context.Context, userId int64) ([]Session, error) {
+func (s *Store) GetUserSessions(ctx context.Context, userId int64) ([]*Session, error) {
+	key := strconv.FormatInt(userId, 10)
+	if item, ok := s.sessionCache.Get(key); ok {
+		sessions, ok := item.([]*Session)
+		if ok {
+			return sessions, nil
+		}
+	}
+
 	return s.driver.GetUserSessions(ctx, userId)
 }

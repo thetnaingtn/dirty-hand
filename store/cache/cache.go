@@ -77,5 +77,5 @@ func (c *Cache) Get(key string) (any, bool) {
 		return nil, false
 	}
 
-	return itm, true
+	return itm.value, true
 }
